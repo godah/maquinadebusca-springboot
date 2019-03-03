@@ -20,6 +20,7 @@ public class Coletor {
 	// URL: http://localhost:8080/coletor/iniciar
 	@GetMapping (value = "/iniciar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public Documento iniciar () {
+		//Pratica2-5
 		return coletorService.executarColeta();
 	}
 
