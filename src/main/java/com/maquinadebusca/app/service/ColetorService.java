@@ -50,12 +50,12 @@ public class ColetorService {
 				
 				//Prática2: Regra 8-a,b
 				verificaColetaConsecultiva(urlStringAnterior, url);
+				
 				//Prática2: Regra 8-c
 				if(!verificaPermissaoRobots(url)) {
 					urlsSementes.remove(0);
 					continue;
 				}
-				
 				
 				Document doc = Jsoup.connect(url.toString()).get();
 				Elements links = doc.select("a[href]");
