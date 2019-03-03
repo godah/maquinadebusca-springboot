@@ -1,24 +1,47 @@
 package com.maquinadebusca.app.model;
 
-import java.net.URL;
-import java.util.List;
+import java.io.Serializable;
 
-public class Documento {
-	
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.validation.constraints.NotBlank;
+
+@Entity
+public class Documento implements Serializable {
+
+	static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	@NotBlank
+	private String url;
+	@Lob
+	@NotBlank
+	private String texto;
+	@Lob
+	@NotBlank
+	private String visao;
+
 	public Documento() {
-		super();
 	}
 
-	private URL url;
-	private String texto;
-	private String visao;
-	private List<String> urls;
+	public Long getId() {
+		return id;
+	}
 
-	public URL getUrl() {
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUrl() {
 		return url;
 	}
 
-	public void setUrl(URL url) {
+	public void setUrl(String url) {
 		this.url = url;
 	}
 
@@ -36,14 +59,6 @@ public class Documento {
 
 	public void setVisao(String visao) {
 		this.visao = visao;
-	}
-
-	public List<String> getUrls() {
-		return urls;
-	}
-
-	public void setUrls(List<String> urls) {
-		this.urls = urls;
 	}
 
 }

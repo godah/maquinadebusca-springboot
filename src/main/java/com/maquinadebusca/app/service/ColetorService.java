@@ -16,90 +16,127 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.SocketUtils;
 
 import com.maquinadebusca.app.model.Documento;
+import com.maquinadebusca.app.model.Link;
+import com.maquinadebusca.app.repository.DocumentoRepository;
+import com.maquinadebusca.app.repository.LinkRepository;
 import com.panforge.robotstxt.RobotsTxt;
 
 @Service
 public class ColetorService {
 	private final Log log = LogFactory.getLog(ColetorService.class);
+
+	@Autowired
+	private DocumentoRepository dr;
+	
+	@Autowired
+	private LinkRepository lr;
 	
 	@Autowired
 	private StopwordsService stopWordsService;
-	
-	List<String> urlsSementes = new ArrayList<>();
-	List<String> urlsLidas = new ArrayList<>();
 
-	//Pratica2-4
-	public Documento executarColeta() {
-		//urlsSementes.add("https://www.github.com");
-		urlsSementes.add("https://www.una.br");
-		//urlsSementes.add("http://mobister.una.br");
-		//urlsSementes.add("http://journals.ecs.soton.ac.uk/java/tutorial/networking/urls/readingWriting.html");
-		//urlsSementes.add("https://stormpath.com/blog/spring-boot-dependency-injection");
-		//urlsSementes.add("https://dzone.com/articles/spring-boot-restful-web-service-complete-example");
-
+	public List<Documento> executar() {
+		List<Documento> documentos = new LinkedList<>();
+		List<String> sementes = new LinkedList<>();
 		String urlStringAnterior = null;
-		while (!urlsSementes.isEmpty()) {
-			log.info("Coletando: "+urlsSementes.get(0));
-			
-			Documento d = new Documento();
-			try {
-				URL url = new URL(urlsSementes.get(0));
-				
-				//Prática2: Regra 8-a,b
-				verificaColetaConsecultiva(urlStringAnterior, url);
-				
-				//Prática2: Regra 8-c
-				if(!verificaPermissaoRobots(url)) {
-					urlsSementes.remove(0);
-					continue;
+		try {
+			sementes.add("https://www.youtube.com/");
+			sementes.add("https://www.facebook.com/");
+			sementes.add("https://www.twitter.com/");
+			for (String url : sementes) {
+				verificaColetaConsecultiva(urlStringAnterior, new URL(url));
+				if(verificaPermissaoRobots(new URL(url))) {
+					documentos.add(this.coletar(url));
 				}
-				
-				Document doc = Jsoup.connect(url.toString()).get();
-				Elements links = doc.select("a[href]");
-				d.setUrl(url);
-				d.setTexto(doc.html());
-				d.setVisao(trataVisao(doc.text()));
-				List<String> urls = new LinkedList<>();
-				for (Element link : links)
-					if ((!link.attr("abs:href").equals("") && (link.attr("abs:href") != null)))
-						urls.add(link.attr("abs:href"));
-				d.setUrls(urls);
-				urlsSementes.addAll(urls);
-				/*
-				//imprimeInformacoes(d);
-				urls = d.getUrls();
-				for (String u : urls)
-					log.info(u);
-				*/
-			} catch (Exception e) {
-				log.error("Erro ao coletar a página.", e);
 			}
-			urlStringAnterior = urlsSementes.get(0);
-			urlsLidas.add(urlsSementes.get(0));
-			urlsSementes.remove(0);
-			if(d.getUrls() != null && !d.getUrls().isEmpty())
-				urlsSementes.addAll(d.getUrls());
-			
-			//Prática2 Regra 9
-			urlsSementes = removeElementosRepetidos(urlsSementes);
-			log.info("Coleta finalizada. ["+urlsSementes.size()+"] URL's Sementes restantes.");
-			//urlsSementes.forEach(p -> System.out.println(p));
+		} catch (Exception e) {
+			System.out.println("Erro ao executar o serviço de coleta!");
+			e.printStackTrace();
 		}
-		return null;
+		return documentos;
+	}
+
+	public Documento coletar(String urlDocumento) {
+		List<String> urlsColetadas = new ArrayList<>();
+		Documento documento = new Documento();
+		try {
+			Document d = Jsoup.connect(urlDocumento).get();
+			Elements urls = d.select("a[href]");
+			documento.setUrl(urlDocumento);
+			documento.setTexto(d.html());
+			documento.setVisao(trataVisao(d.text()));
+			for (Element url : urls) {
+				String u = url.attr("abs:href");
+				if ((!u.equals("")) && (u != null)) {
+					System.out.println(u);
+					urlsColetadas.add(u);
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Erro ao coletar a página.");
+			e.printStackTrace();
+		}
+		documento = dr.save(documento);
+		salvarLinks(urlsColetadas);
+		return documento;
 	}
 	
-	private List<String> removeElementosRepetidos(List<String> urls) {
-		List<String> novaLista = new ArrayList<String>();
+	private void salvarLinks(List<String> urlsColetadas) {
+		List<Link> links = lr.findAll();
+		for (String url : urlsColetadas) {
+			if(url.length() < 255)
+				links.add(new Link(url));
+		}
+		links = removeElementosRepetidos(links);
+		//for (Link link : links) {
+			try {
+				lr.saveAll(links);
+			}catch (Exception e) {
+				log.error("Falha ao gravar links");
+			}
+		//}
+	}
+
+	public List<Documento> getDocumentos() {
+		Iterable<Documento> documentos = dr.findAll();
+		List<Documento> resposta = new LinkedList<>();
+		for (Documento documento : documentos) {
+
+			resposta.add(documento);
+		}
+		return resposta;
+	}
+
+	public Documento getDocumento(long id) {
+		Documento documento = dr.findById(id);
+		return documento;
+	}
+	
+	public List<Link> getLinks() {
+		Iterable<Link> links = lr.findAll();
+		List<Link> resposta = new LinkedList<>();
+		for (Link link : links) {
+
+			resposta.add(link);
+		}
+		return resposta;
+	}
+
+	public Link getLink(long id) {
+		Link link = lr.findById(id);
+		return link;
+	}
+	
+	private List<Link> removeElementosRepetidos(List<Link> urls) {
+		List<Link> novaLista = new ArrayList<>();
 		for(int i = 0;  i < urls.size(); i++){
 			if(novaLista.isEmpty()){
 				novaLista.add(urls.get(i));
 			}else{
 				int count = 0;
-				for(String u :novaLista){
-					if(urls.get(i).equalsIgnoreCase(u)){
+				for(Link u :novaLista){
+					if(urls.get(i).getUrl().equalsIgnoreCase(u.getUrl())){
 						count++;
 					}
 				}
@@ -145,7 +182,7 @@ public class ColetorService {
 			RobotsTxt robotsTxt = RobotsTxt.read(robotsTxtStream);
 			if(!robotsTxt.query(null, url.getPath())) {
 				log.info("robots.txt Disalow ==> "+url.getProtocol()+"://"+url.getHost()+url.getPath());
-				urlsSementes.remove(0);
+				//urlsSementes.remove(0);
 				return false;
 			} else {
 				return true;
@@ -167,22 +204,5 @@ public class ColetorService {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private void imprimeInformacoes(Documento d) {
-		System.out.println("\n\n\n=================================================");
-		System.out.println(">>> URL:");
-		System.out.println("=================================================");
-		System.out.println(d.getUrl());
-		System.out.println("\n\n\n=================================================");
-		System.out.println(">>> Página:");
-		System.out.println("=================================================");
-		System.out.println(d.getTexto());
-		System.out.println("\n\n\n=================================================");
-		System.out.println(">>> Visão:");
-		System.out.println("=================================================");
-		System.out.println(d.getVisao());
-		System.out.println("\n\n\n=================================================");
-		System.out.println(">>> URLs:");
-		System.out.println("=================================================");
-	}
+	
 }
