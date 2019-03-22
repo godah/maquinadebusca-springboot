@@ -12,12 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.maquinadebusca.app.model.Documento;
 import com.maquinadebusca.app.model.Link;
 import com.maquinadebusca.app.service.ColetorService;
+import com.maquinadebusca.app.service.DocumentoService;
 
 @RestController
 @RequestMapping("/coletor") // URL: http://localhost:8080/coletor
 public class Coletor {
 	@Autowired
 	ColetorService cs;
+	
+	@Autowired
+	private DocumentoService documentoService;
 
 	// URL: http://localhost:8080/coletor/iniciar
 	@GetMapping(value = "/iniciar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -29,7 +33,7 @@ public class Coletor {
 	// URL: http://localhost:8080/coletor/listar
 	@GetMapping(value = "/listar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public List<Documento> listar() {
-		return cs.getDocumentos();
+		return documentoService.getDocumentos();
 	}
 
 	// Request for: http://localhost:8080/coletor/listar/{id}
