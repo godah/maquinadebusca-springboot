@@ -1,56 +1,62 @@
 package com.maquinadebusca.app.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.maquinadebusca.app.model.Documento;
-import com.maquinadebusca.app.model.Link;
 import com.maquinadebusca.app.service.ColetorService;
-import com.maquinadebusca.app.service.DocumentoService;
 
 @RestController
 @RequestMapping("/coletor") // URL: http://localhost:8080/coletor
 public class Coletor {
 	@Autowired
 	ColetorService cs;
-	
-	@Autowired
-	private DocumentoService documentoService;
+// URL: http://localhost:8080/coletor/iniciar
 
-	// URL: http://localhost:8080/coletor/iniciar
 	@GetMapping(value = "/iniciar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public List<Documento> iniciar() {
-		List<Documento> documentos = cs.executar();
-		return documentos;
+	public ResponseEntity iniciar() {
+		return new ResponseEntity(cs.executar(), HttpStatus.OK);
 	}
 
-	// URL: http://localhost:8080/coletor/listar
-	@GetMapping(value = "/listar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public List<Documento> listar() {
-		return documentoService.getDocumentos();
+// URL: http://localhost:8080/coletor/documento
+	@GetMapping(value = "/documento", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity listarDocumento() {
+		return new ResponseEntity(cs.getDocumento(), HttpStatus.OK);
 	}
 
-	// Request for: http://localhost:8080/coletor/listar/{id}
-	@GetMapping(value = "/listar/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public Documento listar(@PathVariable(value = "id") long id) {
-		return cs.getDocumento(id);
+// Request for: http://localhost:8080/coletor/documento/{id}
+	@GetMapping(value = "/documento/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity listarDocumento(@PathVariable(value = "id") long id) {
+		return new ResponseEntity(cs.getDocumento(id), HttpStatus.OK);
 	}
 
-	// URL: http://localhost:8080/coletor/link
+// URL: http://localhost:8080/coletor/link
 	@GetMapping(value = "/link", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public List<Link> link() {
-		return cs.getLinks();
+	public ResponseEntity listarLink() {
+		return new ResponseEntity(cs.getLink(), HttpStatus.OK);
 	}
 
-	// Request for: http://localhost:8080/coletor/link/{id}
+// Request for: http://localhost:8080/coletor/link/{id}
 	@GetMapping(value = "/link/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public Link link(@PathVariable(value = "id") long id) {
-		return cs.getLink(id);
+	public ResponseEntity listarLink(@PathVariable(value = "id") long id) {
+		return new ResponseEntity(cs.getLink(id), HttpStatus.OK);
 	}
+	
+
+	// URL: http://localhost:8080/coletor/host
+		@GetMapping(value = "/host", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+		public ResponseEntity listarHost() {
+			return new ResponseEntity(cs.getHost(), HttpStatus.OK);
+		}
+
+	// Request for: http://localhost:8080/coletor/host/{id}
+		@GetMapping(value = "/host/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+		public ResponseEntity listarHost(@PathVariable(value = "id") long id) {
+			return new ResponseEntity(cs.getHost(id), HttpStatus.OK);
+		}
 }

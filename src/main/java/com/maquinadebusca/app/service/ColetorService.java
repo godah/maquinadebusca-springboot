@@ -1,7 +1,6 @@
 package com.maquinadebusca.app.service;
 
-import java.net.URL;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,91 +12,100 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.maquinadebusca.app.model.Documento;
+import com.maquinadebusca.app.model.Host;
 import com.maquinadebusca.app.model.Link;
 import com.maquinadebusca.app.repository.DocumentoRepository;
+import com.maquinadebusca.app.repository.HostRepository;
 import com.maquinadebusca.app.repository.LinkRepository;
 
 @Service
 public class ColetorService {
-
-	@Autowired
-	private StopwordsService stopWordsService;
-	
-	@Autowired
-	private RobotsService robotsService;
-	
-	@Autowired
-	private UtilsService utilsService;
-	
-	@Autowired
-	private DocumentoService documentoService;
-	
-	@Autowired
-	private LinkService linkService;
-	
-	@Autowired
-	private LinkRepository lr;
-	
 	@Autowired
 	private DocumentoRepository dr;
+	@Autowired
+	private LinkRepository lr;
+	@Autowired
+	private HostRepository hr;
+	@Autowired
+	private HostService hostService;
+	
+	
+	List<String> sementes = new LinkedList();
 
 	public List<Documento> executar() {
-		List<Documento> documentos = new LinkedList<>();
-		List<String> sementes = new LinkedList<>();
-		String urlStringAnterior = null;
+		List<Documento> documentos = new LinkedList();
 		try {
 			sementes.add("https://www.youtube.com/");
 			sementes.add("https://www.facebook.com/");
 			sementes.add("https://www.twitter.com/");
-			for (String url : sementes) {
-				utilsService.verificaColetaConsecultiva(urlStringAnterior, new URL(url));
-				if(robotsService.verificaPermissaoRobots(new URL(url))) {
-					documentos.add(this.coletar(url));
-				}
+			while (!sementes.isEmpty()) {
+				documentos.add(this.coletar(sementes.remove(0)));
 			}
 		} catch (Exception e) {
-			System.out.println("Erro ao executar o serviço de coleta!");
+			System.out.println("\n\n\n Erro ao executar o serviço de coleta! \n\n\n");
 			e.printStackTrace();
 		}
 		return documentos;
 	}
 
 	public Documento coletar(String urlDocumento) {
-		List<String> urlsColetadas = new ArrayList<>();
 		Documento documento = new Documento();
+
 		try {
+			Link link = new Link();
 			Document d = Jsoup.connect(urlDocumento).get();
 			Elements urls = d.select("a[href]");
 			documento.setUrl(urlDocumento);
 			documento.setTexto(d.html());
-			documento.setVisao(trataVisao(d.text()));
+			documento.setVisao(d.text());
+			link.setUrl(urlDocumento);
+			link.setUltimaColeta(LocalDateTime.now());
+			link.setHost(hostService.obterHostPorUrl(urlDocumento));
+			documento.addLink(link);
+			int i = 0;
 			for (Element url : urls) {
+				i++;
 				String u = url.attr("abs:href");
 				if ((!u.equals("")) && (u != null)) {
-					System.out.println(u);
-					urlsColetadas.add(u);
+					link = new Link();
+					link.setUrl(u);
+					link.setHost(hostService.obterHostPorUrl(u));
+					link.setUltimaColeta(null);
+					documento.addLink(link);
 				}
 			}
+			System.out.println("Número de links coletados: " + i);
+			System.out.println("Tamanho da lista links: " + documento.getLinks().size());
+			//Salvar o documento no banco de dados.
+			documento = dr.save(documento);
+			//1. Altere o projeto, para que ele colete as novas URLs identificadas em cada página. 
+			if(sementes.isEmpty())
+				sementes = lr.obterUrlsNaoColetadas();
 		} catch (Exception e) {
-			System.out.println("Erro ao coletar a página.");
+			System.out.println("\n\n\n Erro ao coletar a página! \n\n\n");
 			e.printStackTrace();
 		}
-		documento = documentoService.save(documento);
-		linkService.salvarLinks(urlsColetadas);
 		return documento;
 	}
-	
-	
+
+	public List<Documento> getDocumento() {
+		Iterable<Documento> documentos = dr.findAll();
+		List<Documento> resposta = new LinkedList();
+		for (Documento documento : documentos) {
+			resposta.add(documento);
+		}
+		return resposta;
+	}
+
 	public Documento getDocumento(long id) {
 		Documento documento = dr.findById(id);
 		return documento;
 	}
-	
-	public List<Link> getLinks() {
-		Iterable<Link> links = lr.findAll();
-		List<Link> resposta = new LinkedList<>();
-		for (Link link : links) {
 
+	public List<Link> getLink() {
+		Iterable<Link> links = lr.findAll();
+		List<Link> resposta = new LinkedList();
+		for (Link link : links) {
 			resposta.add(link);
 		}
 		return resposta;
@@ -108,12 +116,18 @@ public class ColetorService {
 		return link;
 	}
 	
-	private String trataVisao(String visao1) {
-		String visao = visao1;
-		visao = visao.toLowerCase();
-		visao = utilsService.removerPontuacao(visao);
-		visao = stopWordsService.removerStopWords(visao);
-		return visao;
+	public List<Host> getHost() {
+		Iterable<Host> hosts = hr.findAll();
+		List<Host> resposta = new LinkedList();
+		for (Host host : hosts) {
+			resposta.add(host);
+		}
+		return resposta;
+	}
+
+	public Host getHost(long id) {
+		Host host = hr.findById(id);
+		return host;
 	}
 	
 }

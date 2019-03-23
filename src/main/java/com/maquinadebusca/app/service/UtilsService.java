@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +31,8 @@ public class UtilsService {
 		}
 	}
 
-	public List<Link> removeElementosRepetidos(List<Link> urls) {
+	public List<Link> removeElementosRepetidos(Set<Link> urlsSet) {
+		List<Link> urls = new ArrayList<>(urlsSet);
 		List<Link> novaLista = new ArrayList<>();
 		for(int i = 0;  i < urls.size(); i++){
 			if(novaLista.isEmpty()){
