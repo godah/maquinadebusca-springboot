@@ -1,4 +1,4 @@
-package com.maquinadebusca.app.service;
+package com.maquinadebusca.app.model.service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,5 +71,4 @@ public class UtilsService {
 		}
 		return novaLista;
 	}
-	
 }

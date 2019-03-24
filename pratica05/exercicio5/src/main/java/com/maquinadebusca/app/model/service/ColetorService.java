@@ -1,5 +1,6 @@
-package com.maquinadebusca.app.service;
+package com.maquinadebusca.app.model.service;
 
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,32 +15,50 @@ import org.springframework.stereotype.Service;
 import com.maquinadebusca.app.model.Documento;
 import com.maquinadebusca.app.model.Host;
 import com.maquinadebusca.app.model.Link;
-import com.maquinadebusca.app.repository.DocumentoRepository;
-import com.maquinadebusca.app.repository.HostRepository;
-import com.maquinadebusca.app.repository.LinkRepository;
+import com.maquinadebusca.app.model.repository.DocumentoRepository;
+import com.maquinadebusca.app.model.repository.HostRepository;
+import com.maquinadebusca.app.model.repository.LinkRepository;
 
 @Service
 public class ColetorService {
+
 	@Autowired
 	private DocumentoRepository dr;
+
 	@Autowired
 	private LinkRepository lr;
+
 	@Autowired
 	private HostRepository hr;
 	@Autowired
 	private HostService hostService;
+	@Autowired
+	private UtilsService utilsService;
+	@Autowired
+	private RobotsService robotsService;
 	
-	
+	String urlStringAnterior = null;
+
 	List<String> sementes = new LinkedList<>();
 
 	public List<Documento> executar() {
 		List<Documento> documentos = new LinkedList<>();
+
 		try {
 			sementes.add("https://www.youtube.com/");
 			sementes.add("https://www.facebook.com/");
 			sementes.add("https://www.twitter.com/");
+
 			while (!sementes.isEmpty()) {
-				documentos.add(this.coletar(sementes.remove(0)));
+				URL url = new URL(sementes.get(0));
+				utilsService.verificaColetaConsecultiva(urlStringAnterior, url);
+				if(robotsService.verificaPermissaoRobots(url)) {
+					documentos.add(this.coletar(sementes.get(0)));
+					urlStringAnterior = sementes.remove(0);					
+				} else {
+					sementes.remove(0);
+				}
+				
 			}
 		} catch (Exception e) {
 			System.out.println("\n\n\n Erro ao executar o serviço de coleta! \n\n\n");
@@ -55,32 +74,41 @@ public class ColetorService {
 			Link link = new Link();
 			Document d = Jsoup.connect(urlDocumento).get();
 			Elements urls = d.select("a[href]");
+
 			documento.setUrl(urlDocumento);
 			documento.setTexto(d.html());
-			documento.setVisao(d.text());
+			documento.setVisao(utilsService.removerPontuacao(d.text()));
+
 			link.setUrl(urlDocumento);
 			link.setUltimaColeta(LocalDateTime.now());
 			link.setHost(hostService.obterHostPorUrl(urlDocumento));
+			link.addDocumento(documento);
 			documento.addLink(link);
 			int i = 0;
 			for (Element url : urls) {
 				i++;
 				String u = url.attr("abs:href");
 				if ((!u.equals("")) && (u != null)) {
-					link = new Link();
-					link.setUrl(u);
-					link.setHost(hostService.obterHostPorUrl(u));
-					link.setUltimaColeta(null);
+					link = lr.findByUrl(u);
+					if (link == null) {
+						link = new Link();
+						link.setUrl(u);
+						link.setHost(hostService.obterHostPorUrl(u));
+						link.setUltimaColeta(null);
+					}
+					link.addDocumento(documento);
 					documento.addLink(link);
 				}
 			}
 			System.out.println("Número de links coletados: " + i);
 			System.out.println("Tamanho da lista links: " + documento.getLinks().size());
-			//Salvar o documento no banco de dados.
+			// Salvar o documento no banco de dados.
 			documento = dr.save(documento);
-			//1. Altere o projeto, para que ele colete as novas URLs identificadas em cada página. 
-			if(sementes.isEmpty())
+			// 1. Altere o projeto, para que ele colete as novas URLs identificadas em cada página.
+			if (sementes.isEmpty()) {
 				sementes = lr.obterUrlsNaoColetadas();
+				sementes = utilsService.removeElementosRepetidos(sementes);
+			}
 		} catch (Exception e) {
 			System.out.println("\n\n\n Erro ao coletar a página! \n\n\n");
 			e.printStackTrace();
@@ -115,7 +143,7 @@ public class ColetorService {
 		Link link = lr.findById(id);
 		return link;
 	}
-	
+
 	public List<Host> getHost() {
 		Iterable<Host> hosts = hr.findAll();
 		List<Host> resposta = new LinkedList<>();
@@ -129,5 +157,4 @@ public class ColetorService {
 		Host host = hr.findById(id);
 		return host;
 	}
-	
 }

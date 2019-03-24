@@ -1,17 +1,13 @@
 package com.maquinadebusca.app.model;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -19,33 +15,27 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Link implements Serializable {
+public class Host implements Serializable {
 	static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
 	@NotBlank
 	private String url;
-
 	@Basic
-	private LocalDateTime ultimaColeta;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "documento_id")
-	private Documento documento;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "host_id")
-	private Host host;
+	private Long count;
 
-	public Link() {
+	public Host() {
 	}
 
-	public Link(String url, Documento documento) {
+	public Host(String url, Long count) {
 		this.url = url;
-		this.ultimaColeta = null;
-		this.documento = documento;
+		this.count = count;
+	}
+
+	public Host(String url) {
+		this.url = url;
+		this.count = 1L;
 	}
 
 	public Long getId() {
@@ -64,29 +54,12 @@ public class Link implements Serializable {
 		this.url = url;
 	}
 
-	public LocalDateTime getUltimaColeta() {
-		return ultimaColeta;
+	public Long getCount() {
+		return count;
 	}
 
-	public void setUltimaColeta(LocalDateTime ultimaColeta) {
-		this.ultimaColeta = ultimaColeta;
-	}
-
-	public Documento getDocumento() {
-		return documento;
-
-	}
-
-	public void setDocumento(Documento documento) {
-		this.documento = documento;
-	}
-	
-	public Host getHost() {
-		return host;
-	}
-
-	public void setHost(Host host) {
-		this.host = host;
+	public void setCount(Long count) {
+		this.count = count;
 	}
 
 	@Override
@@ -108,7 +81,7 @@ public class Link implements Serializable {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final Link other = (Link) obj;
+		final Host other = (Host) obj;
 		if (!Objects.equals(this.url, other.url)) {
 			return false;
 		}
