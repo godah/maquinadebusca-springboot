@@ -1,18 +1,20 @@
 package com.maquinadebusca.app.model.service;
 
-import com.maquinadebusca.app.model.Documento;
-import com.maquinadebusca.app.model.Link;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.maquinadebusca.app.model.Documento;
+import com.maquinadebusca.app.model.Link;
 import com.maquinadebusca.app.model.repository.DocumentoRepository;
 import com.maquinadebusca.app.model.repository.LinkRepository;
-import java.time.LocalDateTime;
 
 @Service
 public class ColetorService {

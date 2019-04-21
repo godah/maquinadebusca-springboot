@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,13 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping ("/coletor") // URL: http://localhost:8080/coletor
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Coletor {
 
   @Autowired
   ColetorService cs;
 
   // URL: http://localhost:8080/coletor/iniciar
-  @GetMapping (value = "/iniciar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@GetMapping (value = "/iniciar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity iniciar () {
     return new ResponseEntity (cs.executar (), HttpStatus.OK);
   }
@@ -44,6 +46,7 @@ public class Coletor {
 
   // URL: http://localhost:8080/coletor/link
   @GetMapping (value = "/link", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  //@PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity listarLink () {
     return new ResponseEntity (cs.getLink (), HttpStatus.OK);
   }
