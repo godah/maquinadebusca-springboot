@@ -9,8 +9,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
-@Entity
-public class User implements Serializable {
+import org.dom4j.tree.AbstractEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity(name = "users")
+public class Users extends AbstractEntity implements Serializable {
 	static final long serialVersionUID = 1L;
 
 	  @Id
@@ -22,6 +26,7 @@ public class User implements Serializable {
 	  private String username;
 	  
 	  @NotBlank
+	  @JsonIgnore
 	  private String password;
 	  
 	  @NotBlank
@@ -29,7 +34,9 @@ public class User implements Serializable {
 	  
 	  @NotBlank
 	  private String email;
-
+	  
+	  private Boolean enabled;
+	  
 	public Long getId() {
 		return id;
 	}
@@ -69,6 +76,16 @@ public class User implements Serializable {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	
+	
+
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
 
 	@Override
 	public int hashCode() {
@@ -90,7 +107,7 @@ public class User implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		User other = (User) obj;
+		Users other = (Users) obj;
 		if (email == null) {
 			if (other.email != null)
 				return false;

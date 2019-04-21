@@ -1,21 +1,13 @@
 package com.maquinadebusca.app.model.repository;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.maquinadebusca.app.model.User;
+import com.maquinadebusca.app.model.Users;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<Users, Long> {
 
-  @Override
-  List<User> findAll ();
-
-  User findById (long id);
-
-  User findByUsername (String username);
+  Users findByUsername (String username);
   
-  @Override
-  User save (User link);
-
+  Users findById (long id);
+  
 }
