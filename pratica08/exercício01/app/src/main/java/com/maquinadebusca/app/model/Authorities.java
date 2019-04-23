@@ -3,25 +3,27 @@ package com.maquinadebusca.app.model;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
-public class Authorities implements Serializable{
+@Entity(name = "authorities")
+public class Authorities implements Serializable {
 
 	private static final long serialVersionUID = 6274355684174839516L;
 
 	@Id
-	  @GeneratedValue (strategy = GenerationType.AUTO)
-	  private Long id = -1L;
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
 
-	  @NotBlank
-	  @Column (unique = true)
-	  private String username;
-	  
-	  @NotBlank
-	  private String authority;
+	@NotBlank
+	@Column(unique = true)
+	private String username;
+
+	@NotBlank
+	private String authority;
 
 	public Long getId() {
 		return id;
@@ -37,6 +39,14 @@ public class Authorities implements Serializable{
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getAuthority() {
+		return authority;
+	}
+
+	public void setAuthority(String authority) {
+		this.authority = authority;
 	}
 
 	@Override
@@ -75,6 +85,5 @@ public class Authorities implements Serializable{
 			return false;
 		return true;
 	}
-	  
-	  
+
 }

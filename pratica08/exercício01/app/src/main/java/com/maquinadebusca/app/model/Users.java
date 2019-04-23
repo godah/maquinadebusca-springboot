@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotBlank;
 
 import org.dom4j.tree.AbstractEntity;
@@ -19,7 +22,7 @@ public class Users extends AbstractEntity implements Serializable {
 
 	  @Id
 	  @GeneratedValue (strategy = GenerationType.AUTO)
-	  private Long id = -1L;
+	  private Long id;
 
 	  @NotBlank
 	  @Column (unique = true)
@@ -28,12 +31,12 @@ public class Users extends AbstractEntity implements Serializable {
 	  @NotBlank
 	  @JsonIgnore
 	  private String password;
-	  
-	  @NotBlank
-	  private String role;
-	  
+	    
 	  @NotBlank
 	  private String email;
+	  
+	  @OneToOne
+	  private Authorities authorities;
 	  
 	  private Boolean enabled;
 	  
@@ -61,14 +64,6 @@ public class Users extends AbstractEntity implements Serializable {
 		this.password = password;
 	}
 
-	public String getRole() {
-		return role;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
-
 	public String getEmail() {
 		return email;
 	}
@@ -77,7 +72,13 @@ public class Users extends AbstractEntity implements Serializable {
 		this.email = email;
 	}
 	
-	
+	public Authorities getAuthorities() {
+		return authorities;
+	}
+
+	public void setAuthorities(Authorities authorities) {
+		this.authorities = authorities;
+	}
 
 	public Boolean getEnabled() {
 		return enabled;
@@ -94,7 +95,6 @@ public class Users extends AbstractEntity implements Serializable {
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((password == null) ? 0 : password.hashCode());
-		result = prime * result + ((role == null) ? 0 : role.hashCode());
 		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		return result;
 	}
@@ -122,11 +122,6 @@ public class Users extends AbstractEntity implements Serializable {
 			if (other.password != null)
 				return false;
 		} else if (!password.equals(other.password))
-			return false;
-		if (role == null) {
-			if (other.role != null)
-				return false;
-		} else if (!role.equals(other.role))
 			return false;
 		if (username == null) {
 			if (other.username != null)

@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.maquinadebusca.app.RoleEnum;
+import com.maquinadebusca.app.model.Authorities;
 import com.maquinadebusca.app.model.Users;
 import com.maquinadebusca.app.model.repository.UserRepository;
 
@@ -19,8 +21,7 @@ public class UserService {
 		Iterable<Users> users = ur.findAll();
 		List<Users> resposta = new LinkedList<>();
 		for (Users user : users) {
-			//TODO CORRIGIR O ROLE PEGANDO DA OUTRA TABELA
-			if(user.getRole().equals("ROLE_ADMIN"))
+			if(RoleEnum.ADMIN.getLabel().equals(user.getAuthorities().getAuthority()))
 				resposta.add(user);
 		}
 		return resposta;
@@ -31,7 +32,7 @@ public class UserService {
 		Iterable<Users> users = ur.findAll();
 		List<Users> resposta = new LinkedList<>();
 		for (Users user : users) {
-			if(user.getRole().equals("ROLE_USER"))
+			if(RoleEnum.USER.getLabel().equals(user.getAuthorities().getAuthority()))
 				resposta.add(user);
 		}
 		return resposta;
@@ -53,14 +54,14 @@ public class UserService {
 	
 	public Users getAdmin(long id) {
 		Users user = ur.findById(id);
-		if(user.getRole().equals("ROLE_ADMIN"))
+		if(RoleEnum.ADMIN.getLabel().equals(user.getAuthorities().getAuthority()))
 			return user;
 		return null;
 	}
 	
 	public Users getUser(long id) {
 		Users user = ur.findById(id);
-		if(user.getRole().equals("ROLE_USER"))
+		if(RoleEnum.USER.getLabel().equals(user.getAuthorities().getAuthority()))
 			return user;
 		return null;
 	}

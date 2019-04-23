@@ -27,7 +27,7 @@ public class Coletor {
   ColetorService cs;
 
   // URL: http://localhost:8080/coletor/iniciar
-@GetMapping (value = "/iniciar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping (value = "/iniciar", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity iniciar () {
     return new ResponseEntity (cs.executar (), HttpStatus.OK);
   }
