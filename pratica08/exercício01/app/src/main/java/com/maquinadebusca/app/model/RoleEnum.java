@@ -1,4 +1,4 @@
-package com.maquinadebusca.app;
+package com.maquinadebusca.app.model;
 
 public enum RoleEnum {
 	ADMIN("ROLE_ADMIN"),

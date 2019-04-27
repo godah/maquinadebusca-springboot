@@ -1,12 +1,11 @@
 package com.maquinadebusca.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import java.util.Set;
-import java.util.HashSet;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,112 +14,109 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 @Entity
-@JsonIdentityInfo (
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
-)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Link implements Serializable {
 
-  static final long serialVersionUID = 1L;
+	static final long serialVersionUID = 1L;
 
-  @Id
-  @GeneratedValue (strategy = GenerationType.AUTO)
-  private Long id = -1L;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id = -1L;
 
-  @NotBlank
-  @Column (unique = true)
-  private String url;
+	@NotBlank
+	@Column(unique = true)
+	private String url;
 
-  @Basic
-  private LocalDateTime ultimaColeta;
+	@Basic
+	private LocalDateTime ultimaColeta;
 
-  @ManyToMany (
-          mappedBy = "links", //Nome do atributo na classe Documento.
-          fetch = FetchType.LAZY
-  )
-  private Set<Documento> documentos;
+	@ManyToMany(mappedBy = "links", // Nome do atributo na classe Documento.
+			fetch = FetchType.LAZY)
+	private Set<Documento> documentos;
 
-  public Link () {
-    documentos = new HashSet ();
-  }
+	public Link() {
+		documentos = new HashSet<>();
+	}
 
-  public Link (String url, Documento documento) {
-    this.url = url;
-    this.ultimaColeta = null;
-    this.documentos.add (documento);
-  }
+	public Link(String url, Documento documento) {
+		this.url = url;
+		this.ultimaColeta = null;
+		this.documentos.add(documento);
+	}
 
-  public Long getId () {
-    return id;
-  }
+	public Long getId() {
+		return id;
+	}
 
-  public void setId (Long id) {
-    this.id = id;
-  }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-  public String getUrl () {
-    return url;
-  }
+	public String getUrl() {
+		return url;
+	}
 
-  public void setUrl (String url) {
-    this.url = url;
-  }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-  public LocalDateTime getUltimaColeta () {
-    return ultimaColeta;
-  }
+	public LocalDateTime getUltimaColeta() {
+		return ultimaColeta;
+	}
 
-  public void setUltimaColeta (LocalDateTime ultimaColeta) {
-    this.ultimaColeta = ultimaColeta;
-  }
+	public void setUltimaColeta(LocalDateTime ultimaColeta) {
+		this.ultimaColeta = ultimaColeta;
+	}
 
-  public Set<Documento> getDocumentos () {
-    return documentos;
-  }
+	public Set<Documento> getDocumentos() {
+		return documentos;
+	}
 
-  public void setDocumentos (Set<Documento> documentos) {
-    this.documentos = documentos;
-  }
+	public void setDocumentos(Set<Documento> documentos) {
+		this.documentos = documentos;
+	}
 
-  public void addDocumento (Documento documento) {
-    this.documentos.add (documento);
-  }
+	public void addDocumento(Documento documento) {
+		this.documentos.add(documento);
+	}
 
-  public void removeDocumento (Documento documento) {
-    this.documentos.remove (documento);
-  }
+	public void removeDocumento(Documento documento) {
+		this.documentos.remove(documento);
+	}
 
-  @Override
-  public int hashCode () {
-    int hash = 5;
-    hash = 71 * hash + Objects.hashCode (this.id);
-    hash = 71 * hash + Objects.hashCode (this.url);
-    return hash;
-  }
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 71 * hash + Objects.hashCode(this.id);
+		hash = 71 * hash + Objects.hashCode(this.url);
+		return hash;
+	}
 
-  @Override
-  public boolean equals (Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass () != obj.getClass ()) {
-      return false;
-    }
-    final Link other = (Link) obj;
-    if (!Objects.equals (this.url, other.url)) {
-      return false;
-    }
-    if (!Objects.equals (this.id, other.id)) {
-      return false;
-    }
-    return true;
-  }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Link other = (Link) obj;
+		if (!Objects.equals(this.url, other.url)) {
+			return false;
+		}
+		if (!Objects.equals(this.id, other.id)) {
+			return false;
+		}
+		return true;
+	}
 
 }

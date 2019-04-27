@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.maquinadebusca.app.RoleEnum;
 import com.maquinadebusca.app.model.Authorities;
+import com.maquinadebusca.app.model.RoleEnum;
 import com.maquinadebusca.app.model.Users;
 import com.maquinadebusca.app.model.repository.UserRepository;
 
