@@ -9,14 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.maquinadebusca.app.mensagem.Mensagem;
@@ -113,7 +111,7 @@ public class Usuario {
 		ResponseEntity resposta = null;
 		
 		if (!us.loggedUserIsAdmin(SecurityContextHolder.getContext()) && us.isAdmin(user.getId().intValue())) {
-			resposta = new ResponseEntity(
+			return new ResponseEntity(
 					new Mensagem("erro", "remoção não autorizada, verifique as permissões de acesso."),
 					HttpStatus.UNAUTHORIZED);
 		}
@@ -136,11 +134,11 @@ public class Usuario {
 	}
 
 	// Request for: http://localhost:8080/usuario/usuario
-	@DeleteMapping(value = "/usuario/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@DeleteMapping(value = "/usuariod/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity removerUsuario(@PathVariable(value = "id") Long id) {
 		ResponseEntity resposta = null;
 		if (!us.loggedUserIsAdmin(SecurityContextHolder.getContext()) && us.isAdmin(id.intValue())) {
-			resposta = new ResponseEntity(
+			return new ResponseEntity(
 					new Mensagem("erro", "remoção não autorizada, verifique as permissões de acesso."),
 					HttpStatus.UNAUTHORIZED);
 		}

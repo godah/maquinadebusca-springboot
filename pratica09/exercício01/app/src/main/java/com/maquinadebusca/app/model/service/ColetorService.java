@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -157,5 +159,28 @@ public class ColetorService {
 	public Link getLink(long id) {
 		Link link = lr.findById(id);
 		return link;
+	}
+
+	public boolean removerDoc(Long id) {
+		boolean resp = false;
+		try {
+			dr.deleteById(id);
+			resp = true;
+		} catch (Exception e) {
+			System.out.println("\n>>> Não foi possível remover o documento informado no banco de dados.\n");
+			e.printStackTrace();
+		}
+		return resp;
+	}
+
+	public @Valid Documento removerDoc(@Valid Documento doc) {
+		try {
+			dr.delete(doc);
+		} catch (Exception e) {
+			doc = null;
+			System.out.println("\n>>> Não foi possível remover o documento informado no banco de dados.\n");
+			e.printStackTrace();
+		}
+		return doc;
 	}
 }

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.maquinadebusca.app.mensagem.Mensagem;
+import com.maquinadebusca.app.model.Documento;
 import com.maquinadebusca.app.model.Link;
 import com.maquinadebusca.app.model.service.ColetorService;
 
@@ -45,6 +46,50 @@ public class Coletor {
 	@GetMapping(value = "/documento/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity listarDocumento(@PathVariable(value = "id") Long id) {
 		return new ResponseEntity(cs.getDocumento(id), HttpStatus.OK);
+	}
+
+	// Request for: http://localhost:8080/coletor/documento
+	@PreAuthorize("hasRole('ADMIN')")
+	@DeleteMapping(value = "/documento", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity removerDoc(@RequestBody @Valid Documento doc, BindingResult resultado) {
+		ResponseEntity resposta = null;
+		if (resultado.hasErrors()) {
+			resposta = new ResponseEntity(
+					new Mensagem("erro", "os dados sobre o documento  não foram informados corretamente"),
+					HttpStatus.BAD_REQUEST);
+		} else {
+			doc = cs.removerDoc(doc);
+			if (doc != null) {
+				resposta = new ResponseEntity(new Mensagem("sucesso", "documento removido com suceso"), HttpStatus.OK);
+			} else {
+				resposta = new ResponseEntity(
+						new Mensagem("erro", "não foi possível remover o documento informado no banco de dados"),
+						HttpStatus.NOT_ACCEPTABLE);
+			}
+		}
+		return resposta;
+	}
+
+	// Request for: http://localhost:8080/coletor/link
+	@PreAuthorize("hasRole('ADMIN')")
+	@DeleteMapping(value = "/documento/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity removerDoc(@PathVariable(value = "id") Long id) {
+		ResponseEntity resposta = null;
+		if ((id != null) && (id <= 0)) {
+			resposta = new ResponseEntity(
+					new Mensagem("erro", "os dados sobre o documento  não foram informados corretamente"),
+					HttpStatus.BAD_REQUEST);
+		} else {
+			boolean resp = cs.removerDoc(id);
+			if (resp == true) {
+				resposta = new ResponseEntity(new Mensagem("sucesso", "documento removido com suceso"), HttpStatus.OK);
+			} else {
+				resposta = new ResponseEntity(
+						new Mensagem("erro", "não foi possível remover o documento informado no banco de dados"),
+						HttpStatus.NOT_ACCEPTABLE);
+			}
+		}
+		return resposta;
 	}
 
 	// URL: http://localhost:8080/coletor/link

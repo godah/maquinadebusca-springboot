@@ -12,8 +12,6 @@ import javax.validation.constraints.NotBlank;
 
 import org.dom4j.tree.AbstractEntity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity(name = "users")
 public class Users extends AbstractEntity implements Serializable {
 	static final long serialVersionUID = 1L;
