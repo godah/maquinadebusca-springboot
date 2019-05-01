@@ -83,11 +83,11 @@ public class ColetorService {
 				utilsService.verificaColetaConsecultiva(urlStringAnterior, url);
 				if(robotsService.verificaPermissaoRobots(url)) {
 					documentos.add(this.coletar(sementes.get(0)));
-					urlStringAnterior = sementes.remove(0);					
+//					urlStringAnterior = sementes.remove(0);					
 				} else {
 					sementes.remove(0);
 				}
-				
+				System.out.println(sementes.size()+" Sementes restantes.");
 			}
 		} catch (Exception e) {
 			System.out.println("\n\n\n Erro ao executar o serviço de coleta! \n\n\n");
@@ -97,6 +97,7 @@ public class ColetorService {
 	}
 
 	public Documento coletar(String urlDocumento) {
+		System.out.println("Iniciando coleta url ["+urlDocumento+"]");
 		Documento documento = new Documento();
 
 		try {
@@ -113,36 +114,42 @@ public class ColetorService {
 			link.setHost(hostService.obterHostPorUrl(urlDocumento));
 			link.addDocumento(documento);
 			documento.addLink(link);
-			int i = 0;
-			for (Element url : urls) {
-				i++;
-				String u = url.attr("abs:href");
-				if ((!u.equals("")) && (u != null)) {
-					link = lr.findByUrl(u);
-					if (link == null) {
-						link = new Link();
-						link.setUrl(u);
-						link.setHost(hostService.obterHostPorUrl(u));
-						link.setUltimaColeta(null);
-					}
-					link.addDocumento(documento);
-					documento.addLink(link);
-				}
-			}
-			System.out.println("Número de links coletados: " + i);
-			System.out.println("Tamanho da lista links: " + documento.getLinks().size());
-			// 1. Altere o projeto, para que ele colete as novas URLs identificadas em cada página.
-			if (sementes.isEmpty()) {
-				sementes = lr.obterUrlsNaoColetadas();
-				sementes = utilsService.removeElementosRepetidos(sementes);
-			}
+			
+			gravaLinksColetados(urlDocumento, documento, urls);
 			// Salvar o documento no banco de dados.
 			documento = dr.save(documento);
+			// 1. Altere o projeto, para que ele colete as novas URLs identificadas em cada página.
+			urlStringAnterior = sementes.remove(0);
+			sementes.addAll(lr.obterUrlsNaoColetadas());
+			sementes = utilsService.removeElementosRepetidos(sementes);
 		} catch (Exception e) {
 			System.out.println("\n\n\n Erro ao coletar a página! \n\n\n");
 			e.printStackTrace();
 		}
 		return documento;
+	}
+
+	private void gravaLinksColetados(String urlDocumento, Documento documento, Elements urls) {
+		Link link;
+		int i = 0;
+		for (Element url : urls) {
+			i++;
+			String u = url.attr("abs:href");
+			if ((!u.equals("")) && (u != null)) {
+				link = lr.findByUrl(u);
+				if (link == null) {
+					link = new Link();
+					link.setUrl(u);
+					link.setHost(hostService.obterHostPorUrl(u));
+					link.setUltimaColeta(null);
+				}
+				link.addDocumento(documento);
+				documento.addLink(link);
+			}
+		}
+		System.out.println("Finalizano coleta de ["+urlDocumento+"].");
+		System.out.println("Número de links coletados: ["+i+"]");
+		System.out.println("Tamanho da lista links: [" + documento.getLinks().size()+"]");
 	}
 
 	public List<Documento> getDocumento() {

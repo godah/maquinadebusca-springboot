@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
@@ -31,6 +32,7 @@ public class Link implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id = -1L;
 
+	@Lob
 	@NotBlank
 	@Column(unique = true)
 	private String url;
