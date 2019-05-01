@@ -31,6 +31,7 @@ public class Documento implements Serializable {
   @GeneratedValue (strategy = GenerationType.AUTO)
   private Long id;
 
+  @Lob
   @NotBlank
   private String url;
 

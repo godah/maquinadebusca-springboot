@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -55,6 +57,17 @@ public class ColetorService {
 			e.printStackTrace();
 		}
 		return ls;
+	}
+	
+	public Link atualizarLink(Link link) {
+		Link l = null;
+		try {
+			l = lr.save(link);
+		} catch (Exception e) {
+			System.out.println("\n>>> Não foi possível atualizar o link informado no banco de dados.\n");
+			e.printStackTrace();
+		}
+		return l;
 	}
 
 	public List<Documento> executar() {
@@ -118,13 +131,13 @@ public class ColetorService {
 			}
 			System.out.println("Número de links coletados: " + i);
 			System.out.println("Tamanho da lista links: " + documento.getLinks().size());
-			// Salvar o documento no banco de dados.
-			documento = dr.save(documento);
 			// 1. Altere o projeto, para que ele colete as novas URLs identificadas em cada página.
 			if (sementes.isEmpty()) {
 				sementes = lr.obterUrlsNaoColetadas();
 				sementes = utilsService.removeElementosRepetidos(sementes);
 			}
+			// Salvar o documento no banco de dados.
+			documento = dr.save(documento);
 		} catch (Exception e) {
 			System.out.println("\n\n\n Erro ao coletar a página! \n\n\n");
 			e.printStackTrace();
@@ -158,6 +171,52 @@ public class ColetorService {
 	public Link getLink(long id) {
 		Link link = lr.findById(id);
 		return link;
+	}
+
+	public boolean removerLink(Long id) {
+		boolean resp = false;
+		try {
+			lr.deleteById(id);
+			resp = true;
+		} catch (Exception e) {
+			System.out.println("\n>>> Não foi possível remover o link informado no banco de dados.\n");
+			e.printStackTrace();
+		}
+		return resp;
+	}
+
+	public Link removerLink(Link link) {
+		try {
+			lr.delete(link);
+		} catch (Exception e) {
+			link = null;
+			System.out.println("\n>>> Não foi possível remover o link informado no banco de dados.\n");
+			e.printStackTrace();
+		}
+		return link;
+	}
+	
+	public boolean removerDoc(Long id) {
+		boolean resp = false;
+		try {
+			dr.deleteById(id);
+			resp = true;
+		} catch (Exception e) {
+			System.out.println("\n>>> Não foi possível remover o documento informado no banco de dados.\n");
+			e.printStackTrace();
+		}
+		return resp;
+	}
+
+	public @Valid Documento removerDoc(@Valid Documento doc) {
+		try {
+			dr.delete(doc);
+		} catch (Exception e) {
+			doc = null;
+			System.out.println("\n>>> Não foi possível remover o documento informado no banco de dados.\n");
+			e.printStackTrace();
+		}
+		return doc;
 	}
 
 }

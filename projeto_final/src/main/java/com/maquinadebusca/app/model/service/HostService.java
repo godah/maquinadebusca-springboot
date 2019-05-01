@@ -2,6 +2,8 @@ package com.maquinadebusca.app.model.service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,5 +50,19 @@ public class HostService {
 	public Host incrementaQtdUlrs(Host host) {
 		host.setCount(host.getCount() + 1L);
 		return hr.save(host);
+	}
+	
+	public List<Host> getHost() {
+		Iterable<Host> hosts = hr.findAll();
+		List<Host> resposta = new LinkedList<>();
+		for (Host host : hosts) {
+			resposta.add(host);
+		}
+		return resposta;
+	}
+
+	public Host getHost(long id) {
+		Host host = hr.findById(id);
+		return host;
 	}
 }
