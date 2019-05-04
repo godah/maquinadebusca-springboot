@@ -25,6 +25,6 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
 
   List<Link> findByUrlIgnoreCaseContaining (String url);
   
-  @Query (value = "SELECT * FROM link ORDER BY url", nativeQuery = true)
+  @Query (value = "SELECT * FROM Link ORDER BY url", nativeQuery = true)
   List<Link> getInLexicalOrder ();
 }

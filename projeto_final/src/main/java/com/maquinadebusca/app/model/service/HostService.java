@@ -93,4 +93,8 @@ public class HostService {
 		}
 		return host;
 	}
+	
+	public List<Host> listarEmOrdemAlfabetica() {
+		return hr.getInLexicalOrder();
+	}
 }

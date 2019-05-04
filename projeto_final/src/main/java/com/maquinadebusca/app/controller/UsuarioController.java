@@ -162,8 +162,18 @@ public class UsuarioController {
 	public ResponseEntity encontrarDocumento(@PathVariable(value = "username") String username) {
 		if (!us.loggedUserIsAdmin(SecurityContextHolder.getContext())) {
 			return new ResponseEntity(us.encontrarUsuario(username), HttpStatus.OK);
-		}else {
+		} else {
 			return new ResponseEntity(us.encontrarTodos(username), HttpStatus.OK);
+		}
+	}
+
+	// Request for: http://localhost:8080/usuario/ordemAlfabetica
+	@GetMapping(value = "/ordemAlfabetica", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity listarEmOrdemAlfabetica() {
+		if (!us.loggedUserIsAdmin(SecurityContextHolder.getContext())) {
+			return new ResponseEntity(us.listarEmOrdemAlfabetica(), HttpStatus.OK);
+		}else {
+			return new ResponseEntity(us.listarTodosEmOrdemAlfabetica(), HttpStatus.OK);
 		}
 	}
 }

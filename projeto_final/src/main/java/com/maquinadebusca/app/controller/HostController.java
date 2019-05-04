@@ -88,4 +88,10 @@ public class HostController {
 		}
 		return resposta;
 	}
+
+	// Request for: http://localhost:8080/host/ordemAlfabetica
+	@GetMapping(value = "/ordemAlfabetica", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity listarEmOrdemAlfabetica() {
+		return new ResponseEntity(hs.listarEmOrdemAlfabetica(), HttpStatus.OK);
+	}
 }

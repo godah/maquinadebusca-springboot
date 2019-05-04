@@ -139,4 +139,18 @@ public class UserService {
 	public List<Users> encontrarTodos(String username) {
 		return ur.findByUsernameIgnoreCaseContaining(username);
 	}
+	
+	public List<Users> listarTodosEmOrdemAlfabetica() {
+		return ur.getInLexicalOrder();
+	}
+	
+	public List<Users> listarEmOrdemAlfabetica() {
+		List<Users> usuarios = ur.getInLexicalOrder();
+		List<Users> retorno = new ArrayList<>();
+		for (Users user : usuarios) {
+			if(RoleEnum.USER.getLabel().equals(user.getAuthorities().getAuthority()))
+				retorno.add(user);
+		}
+		return retorno;
+	}
 }

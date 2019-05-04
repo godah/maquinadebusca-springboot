@@ -91,4 +91,7 @@ public class LinkService {
 		return lr.findByUrlIgnoreCaseContaining(url);
 	}
 
+	public List<Link> listarEmOrdemAlfabetica() {
+		return lr.getInLexicalOrder();
+	}
 }

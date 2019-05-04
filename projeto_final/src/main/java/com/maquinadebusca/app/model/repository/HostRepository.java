@@ -13,9 +13,15 @@ public interface HostRepository extends JpaRepository<Host, Long> {
 	List<Host> findAll();
 
 	Host findById(long id);
-	
+
 	@Query(value = "SELECT h FROM Host h WHERE h.url = ?1 ")
 	Host obterPorUrl(String url);
 
 	List<Host> findByUrlIgnoreCaseContaining(String url);
+
+	@Query(value = "SELECT * FROM Host WHERE url = ?1 ORDER BY url", nativeQuery = true)
+	List<Host> getInLexicalOrderPorUrl(String url);
+	
+	@Query(value = "SELECT * FROM Host ORDER BY url", nativeQuery = true)
+	List<Host> getInLexicalOrder();
 }

@@ -133,4 +133,10 @@ public class LinkController {
 		return new ResponseEntity(ls.encontrarLinkUrl(url), HttpStatus.OK);
 	}
 
+	// Request for: http://localhost:8080/link/ordemAlfabetica
+	@GetMapping(value = "/ordemAlfabetica", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity listarEmOrdemAlfabetica() {
+		return new ResponseEntity(ls.listarEmOrdemAlfabetica(), HttpStatus.OK);
+	}
+
 }
