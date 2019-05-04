@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,48 +25,18 @@ public class ColetorService {
 
 	@Autowired
 	private LinkRepository lr;
-	
+
 	@Autowired
 	private HostService hostService;
+	
 	@Autowired
 	private UtilsService utilsService;
+	
 	@Autowired
 	private RobotsService robotsService;
-	
+
 	String urlStringAnterior = null;
 	List<String> sementes = new LinkedList<>();
-
-	public Link salvarLink(Link link) {
-		Link l = null;
-		try {
-			l = lr.save(link);
-		} catch (Exception e) {
-			System.out.println("\n>>> Não foi possível salvar o link informado no banco de dados.\n");
-			e.printStackTrace();
-		}
-		return l;
-	}
-
-	public List<Link> salvarLinks(List<Link> links) {
-		List<Link> ls = null;
-		try {
-			ls = lr.saveAll(links);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return ls;
-	}
-	
-	public Link atualizarLink(Link link) {
-		Link l = null;
-		try {
-			l = lr.save(link);
-		} catch (Exception e) {
-			System.out.println("\n>>> Não foi possível atualizar o link informado no banco de dados.\n");
-			e.printStackTrace();
-		}
-		return l;
-	}
 
 	public List<Documento> executar() {
 		List<Documento> documentos = new LinkedList<>();
@@ -81,13 +49,13 @@ public class ColetorService {
 			while (!sementes.isEmpty()) {
 				URL url = new URL(sementes.get(0));
 				utilsService.verificaColetaConsecultiva(urlStringAnterior, url);
-				if(robotsService.verificaPermissaoRobots(url)) {
+				if (robotsService.verificaPermissaoRobots(url)) {
 					documentos.add(this.coletar(sementes.get(0)));
-//					urlStringAnterior = sementes.remove(0);					
+					// urlStringAnterior = sementes.remove(0);
 				} else {
 					sementes.remove(0);
 				}
-				System.out.println(sementes.size()+" Sementes restantes.");
+				System.out.println(sementes.size() + " Sementes restantes.");
 			}
 		} catch (Exception e) {
 			System.out.println("\n\n\n Erro ao executar o serviço de coleta! \n\n\n");
@@ -97,7 +65,7 @@ public class ColetorService {
 	}
 
 	public Documento coletar(String urlDocumento) {
-		System.out.println("Iniciando coleta url ["+urlDocumento+"]");
+		System.out.println("Iniciando coleta url [" + urlDocumento + "]");
 		Documento documento = new Documento();
 
 		try {
@@ -114,11 +82,13 @@ public class ColetorService {
 			link.setHost(hostService.obterHostPorUrl(urlDocumento));
 			link.addDocumento(documento);
 			documento.addLink(link);
-			
+
 			gravaLinksColetados(urlDocumento, documento, urls);
 			// Salvar o documento no banco de dados.
+			documento.setLinks(utilsService.removeElementosRepetidos(documento.getLinks()));
 			documento = dr.save(documento);
-			// 1. Altere o projeto, para que ele colete as novas URLs identificadas em cada página.
+			// 1. Altere o projeto, para que ele colete as novas URLs identificadas em cada
+			// página.
 			urlStringAnterior = sementes.remove(0);
 			sementes.addAll(lr.obterUrlsNaoColetadas());
 			sementes = utilsService.removeElementosRepetidos(sementes);
@@ -147,83 +117,9 @@ public class ColetorService {
 				documento.addLink(link);
 			}
 		}
-		System.out.println("Finalizano coleta de ["+urlDocumento+"].");
-		System.out.println("Número de links coletados: ["+i+"]");
-		System.out.println("Tamanho da lista links: [" + documento.getLinks().size()+"]");
-	}
-
-	public List<Documento> getDocumento() {
-		Iterable<Documento> documentos = dr.findAll();
-		List<Documento> resposta = new LinkedList<>();
-		for (Documento documento : documentos) {
-			resposta.add(documento);
-		}
-		return resposta;
-	}
-
-	public Documento getDocumento(long id) {
-		Documento documento = dr.findById(id);
-		return documento;
-	}
-
-	public List<Link> getLink() {
-		Iterable<Link> links = lr.findAll();
-		List<Link> resposta = new LinkedList<>();
-		for (Link link : links) {
-			resposta.add(link);
-		}
-		return resposta;
-	}
-
-	public Link getLink(long id) {
-		Link link = lr.findById(id);
-		return link;
-	}
-
-	public boolean removerLink(Long id) {
-		boolean resp = false;
-		try {
-			lr.deleteById(id);
-			resp = true;
-		} catch (Exception e) {
-			System.out.println("\n>>> Não foi possível remover o link informado no banco de dados.\n");
-			e.printStackTrace();
-		}
-		return resp;
-	}
-
-	public Link removerLink(Link link) {
-		try {
-			lr.delete(link);
-		} catch (Exception e) {
-			link = null;
-			System.out.println("\n>>> Não foi possível remover o link informado no banco de dados.\n");
-			e.printStackTrace();
-		}
-		return link;
-	}
-	
-	public boolean removerDoc(Long id) {
-		boolean resp = false;
-		try {
-			dr.deleteById(id);
-			resp = true;
-		} catch (Exception e) {
-			System.out.println("\n>>> Não foi possível remover o documento informado no banco de dados.\n");
-			e.printStackTrace();
-		}
-		return resp;
-	}
-
-	public @Valid Documento removerDoc(@Valid Documento doc) {
-		try {
-			dr.delete(doc);
-		} catch (Exception e) {
-			doc = null;
-			System.out.println("\n>>> Não foi possível remover o documento informado no banco de dados.\n");
-			e.printStackTrace();
-		}
-		return doc;
+		System.out.println("Finalizano coleta de [" + urlDocumento + "].");
+		System.out.println("Número de links coletados: [" + i + "]");
+		System.out.println("Tamanho da lista links: [" + documento.getLinks().size() + "]");
 	}
 
 }

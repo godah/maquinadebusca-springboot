@@ -3,6 +3,7 @@ package com.maquinadebusca.app.model.service;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,9 +32,9 @@ public class UtilsService {
 		}
 	}
 
-	public List<Link> removeElementosRepetidos(Set<Link> urlsSet) {
+	public Set<Link> removeElementosRepetidos(Set<Link> urlsSet) {
 		List<Link> urls = new ArrayList<>(urlsSet);
-		List<Link> novaLista = new ArrayList<>();
+		Set<Link> novaLista = new HashSet<>();
 		for(int i = 0;  i < urls.size(); i++){
 			if(novaLista.isEmpty()){
 				novaLista.add(urls.get(i));

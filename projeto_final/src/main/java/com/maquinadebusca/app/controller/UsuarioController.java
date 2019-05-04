@@ -22,12 +22,10 @@ import com.maquinadebusca.app.model.RoleEnum;
 import com.maquinadebusca.app.model.Users;
 import com.maquinadebusca.app.model.service.UserService;
 
-
-
 @RestController
 @RequestMapping("/usuario") // URL: http://localhost:8080/usuario
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Usuario {
+public class UsuarioController {
 
 	@Autowired
 	UserService us;
@@ -39,9 +37,9 @@ public class Usuario {
 		return new ResponseEntity(us.getAdmin(), HttpStatus.OK);
 	}
 
-	// URL: http://localhost:8080/usuario/usuario
+	// URL: http://localhost:8080/usuario
 	@PreAuthorize("hasRole('USER')")
-	@GetMapping(value = "/usuario", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity listarUsuario() {
 		return new ResponseEntity(us.getUser(), HttpStatus.OK);
 	}
@@ -53,16 +51,16 @@ public class Usuario {
 		return new ResponseEntity(us.getAdmin(id), HttpStatus.OK);
 	}
 
-	// URL: http://localhost:8080/usuario/administrador/{id}
+	// URL: http://localhost:8080/usuario/{id}
 	@PreAuthorize("hasRole('USER')")
-	@GetMapping(value = "/usuario/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity listarUsuario(@PathVariable(value = "id") long id) {
 		return new ResponseEntity(us.getUser(id), HttpStatus.OK);
 	}
 
 	// Request for: http://localhost:8080/usuario/administrador
 	@PreAuthorize("hasRole('ADMIN')")
-	@PostMapping(value = "/administrador", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)	
+	@PostMapping(value = "/administrador", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity inserirAdmin(@RequestBody @Valid Users users, BindingResult resultado) {
 		ResponseEntity resposta = null;
 		if (resultado.hasErrors()) {
@@ -82,9 +80,9 @@ public class Usuario {
 		return resposta;
 	}
 
-	// Request for: http://localhost:8080/usuario/administrador
+	// Request for: http://localhost:8080/usuario
 	@PreAuthorize("hasRole('USER')")
-	@PostMapping(value = "/usuario", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity inserirUser(@RequestBody @Valid Users users, BindingResult resultado) {
 		ResponseEntity resposta = null;
 		if (resultado.hasErrors() || users.getAuthorities().getAuthority().equals(RoleEnum.ADMIN.getLabel())) {
@@ -104,18 +102,17 @@ public class Usuario {
 		return resposta;
 	}
 
-	
-	// Request for: http://localhost:8080/usuario/usuario
-	@DeleteMapping(value = "/usuario", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	// Request for: http://localhost:8080/usuario/remove
+	@DeleteMapping(value = "/remove", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity removerUser(@RequestBody @Valid Users user, BindingResult resultado) {
 		ResponseEntity resposta = null;
-		
+
 		if (!us.loggedUserIsAdmin(SecurityContextHolder.getContext()) && us.isAdmin(user.getId().intValue())) {
 			return new ResponseEntity(
 					new Mensagem("erro", "remoção não autorizada, verifique as permissões de acesso."),
 					HttpStatus.UNAUTHORIZED);
 		}
-		
+
 		if (resultado.hasErrors()) {
 			resposta = new ResponseEntity(
 					new Mensagem("erro", "os dados sobre o usuario  não foram informados corretamente"),
@@ -133,8 +130,8 @@ public class Usuario {
 		return resposta;
 	}
 
-	// Request for: http://localhost:8080/usuario/usuario
-	@DeleteMapping(value = "/usuariod/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	// Request for: http://localhost:8080/usuario/remove/{id}
+	@DeleteMapping(value = "/remove/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity removerUsuario(@PathVariable(value = "id") Long id) {
 		ResponseEntity resposta = null;
 		if (!us.loggedUserIsAdmin(SecurityContextHolder.getContext()) && us.isAdmin(id.intValue())) {
@@ -142,7 +139,7 @@ public class Usuario {
 					new Mensagem("erro", "remoção não autorizada, verifique as permissões de acesso."),
 					HttpStatus.UNAUTHORIZED);
 		}
-		
+
 		if ((id != null) && (id <= 0)) {
 			resposta = new ResponseEntity(
 					new Mensagem("erro", "os dados sobre o usuario  não foram informados corretamente"),
@@ -158,5 +155,15 @@ public class Usuario {
 			}
 		}
 		return resposta;
+	}
+
+	// Request for: http://localhost:8080/usuario/encontrar/{username}
+	@GetMapping(value = "/encontrar/{username}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity encontrarDocumento(@PathVariable(value = "username") String username) {
+		if (!us.loggedUserIsAdmin(SecurityContextHolder.getContext())) {
+			return new ResponseEntity(us.encontrarUsuario(username), HttpStatus.OK);
+		}else {
+			return new ResponseEntity(us.encontrarTodos(username), HttpStatus.OK);
+		}
 	}
 }

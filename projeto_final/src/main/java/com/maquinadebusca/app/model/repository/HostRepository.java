@@ -17,4 +17,5 @@ public interface HostRepository extends JpaRepository<Host, Long> {
 	@Query(value = "SELECT h FROM Host h WHERE h.url = ?1 ")
 	Host obterPorUrl(String url);
 
+	List<Host> findByUrlIgnoreCaseContaining(String url);
 }

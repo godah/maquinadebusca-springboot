@@ -1,5 +1,6 @@
 package com.maquinadebusca.app.model.service;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -89,7 +90,7 @@ public class UserService {
 		}
 		return null;
 	}
-	
+
 	public boolean removerUser(Long id) {
 		boolean resp = false;
 		try {
@@ -117,11 +118,25 @@ public class UserService {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		String role = userDetails.getAuthorities().iterator().next().toString();
-		return RoleEnum.ADMIN.getLabel().equals(role); 
+		return RoleEnum.ADMIN.getLabel().equals(role);
 	}
-	
+
 	public Boolean isAdmin(Integer id) {
 		Users userDb = ur.findById(id);
 		return userDb.getAuthorities().getAuthority().equals(RoleEnum.ADMIN.getLabel());
+	}
+
+	public List<Users> encontrarUsuario(String username) {
+		List<Users> usuarios = ur.findByUsernameIgnoreCaseContaining(username);
+		List<Users> retorno = new ArrayList<>();
+		for (Users user : usuarios) {
+			if(RoleEnum.USER.getLabel().equals(user.getAuthorities().getAuthority()))
+				retorno.add(user);
+		}
+		return retorno;
+	}
+	
+	public List<Users> encontrarTodos(String username) {
+		return ur.findByUsernameIgnoreCaseContaining(username);
 	}
 }
