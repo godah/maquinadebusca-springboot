@@ -14,4 +14,6 @@ public interface DocumentoRepository extends JpaRepository<Documento, Long> {
   Documento findById (long id);
   
   List<Documento> findByUrlIgnoreCaseContaining(String url);
+  
+  Documento findByUrl(String url);
 }

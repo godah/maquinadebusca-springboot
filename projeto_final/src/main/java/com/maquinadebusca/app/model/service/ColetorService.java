@@ -2,6 +2,7 @@ package com.maquinadebusca.app.model.service;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,6 +12,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.maquinadebusca.app.model.Documento;
 import com.maquinadebusca.app.model.Link;
@@ -66,51 +69,82 @@ public class ColetorService {
 
 	public Documento coletar(String urlDocumento) {
 		System.out.println("Iniciando coleta url [" + urlDocumento + "]");
-		Documento documento = new Documento();
+		Documento documento = null;
 
 		try {
-			Link link = new Link();
+			
 			Document d = Jsoup.connect(urlDocumento).get();
 			Elements urls = d.select("a[href]");
 
-			documento.setUrl(urlDocumento);
+			documento = loadOrNewDoc(urlDocumento);
+			
 			documento.setTexto(d.html());
 			documento.setVisao(utilsService.removerPontuacao(d.text()));
-
-			link.setUrl(urlDocumento);
-			link.setUltimaColeta(LocalDateTime.now());
-			link.setHost(hostService.obterHostPorUrl(urlDocumento));
-			link.addDocumento(documento);
-			documento.addLink(link);
-
-			gravaLinksColetados(urlDocumento, documento, urls);
-			// Salvar o documento no banco de dados.
+			
+			trataLinksColetados(urlDocumento, documento, urls);
 			documento.setLinks(utilsService.removeElementosRepetidos(documento.getLinks()));
+			
+			//urlStringAnterior = sementes.remove(0);
 			documento = dr.save(documento);
-			// 1. Altere o projeto, para que ele colete as novas URLs identificadas em cada
-			// página.
+			
+		} catch (Exception e) {
+			System.out.println("\n\n\n Erro ao coletar a página! \n\n\n");
+			//urlStringAnterior = sementes.remove(0);
+			e.printStackTrace();
+		} finally {
 			urlStringAnterior = sementes.remove(0);
 			sementes.addAll(lr.obterUrlsNaoColetadas());
 			sementes = utilsService.removeElementosRepetidos(sementes);
-		} catch (Exception e) {
-			System.out.println("\n\n\n Erro ao coletar a página! \n\n\n");
-			e.printStackTrace();
 		}
 		return documento;
 	}
 
-	private void gravaLinksColetados(String urlDocumento, Documento documento, Elements urls) {
+	private Documento loadOrNewDoc(String urlDocumento) {
+		Documento documento;
 		Link link;
+		Documento docOld = dr.findByUrl(urlDocumento);
+		if(docOld != null && docOld.getId() != null) {
+			documento = docOld;
+		}else {
+			documento = new Documento();
+			documento.setUrl(urlDocumento);
+			
+			link = loadOrNewLink(urlDocumento, documento);
+			documento.addLink(link);
+		}
+		return documento;
+	}
+
+	private Link loadOrNewLink(String urlDocumento, Documento documento) {
+		Link link;
+		link = lr.findByUrl(urlDocumento);
+		if (link == null) {
+			link = new Link();
+			link.setUrl(urlDocumento);
+			link.setHost(hostService.obterHostPorUrl(urlDocumento));
+		}
+		link.setUltimaColeta(LocalDateTime.now());
+		link.addDocumento(documento);
+		return link;
+	}
+
+	private void trataLinksColetados(String urlDocumento, Documento documento, Elements urls) {
+		List<String> urlsColetadas = new ArrayList<>();
+		Link link;
+		
+		urlsColetadas = converteElementToList(urls, urlsColetadas);
+		
 		int i = 0;
-		for (Element url : urls) {
+		for (String url : urlsColetadas) {
+			if (url.length() > 253)
+				continue;
 			i++;
-			String u = url.attr("abs:href");
-			if ((!u.equals("")) && (u != null)) {
-				link = lr.findByUrl(u);
+			if ((!url.equals("")) && (url != null)) {
+				link = lr.findByUrl(url);
 				if (link == null) {
 					link = new Link();
-					link.setUrl(u);
-					link.setHost(hostService.obterHostPorUrl(u));
+					link.setUrl(url);
+					link.setHost(hostService.obterHostPorUrl(url));
 					link.setUltimaColeta(null);
 				}
 				link.addDocumento(documento);
@@ -120,6 +154,14 @@ public class ColetorService {
 		System.out.println("Finalizano coleta de [" + urlDocumento + "].");
 		System.out.println("Número de links coletados: [" + i + "]");
 		System.out.println("Tamanho da lista links: [" + documento.getLinks().size() + "]");
+	}
+
+	private List<String> converteElementToList(Elements urls, List<String> urlsColetadas) {
+		for (Element url : urls) {
+			urlsColetadas.add(url.attr("abs:href"));
+		}
+		urlsColetadas = utilsService.removeElementosRepetidos(urlsColetadas);
+		return urlsColetadas;
 	}
 
 }

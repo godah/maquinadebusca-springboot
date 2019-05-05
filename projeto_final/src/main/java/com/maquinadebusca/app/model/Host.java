@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -17,13 +17,17 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Host implements Serializable {
+	
 	static final long serialVersionUID = 1L;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	@Lob
+	
 	@NotBlank
+	@Column(unique = true)
 	private String url;
+	
 	@Basic
 	private Long count;
 
